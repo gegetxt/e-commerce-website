@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function ProductCard({
   title = "Graphic Design",
   category = "English Department",
@@ -5,9 +7,16 @@ export default function ProductCard({
   price = "$6.48",
   image = "/images/p1.png",
   className = "",
+  to = "",
 }) {
+  const wrapperClassName = `h-[324px] bg-white flex flex-col ${className}`.trim();
+  const Wrapper = to ? Link : "div";
+  const wrapperProps = to
+    ? { to, className: wrapperClassName, "aria-label": title }
+    : { className: wrapperClassName };
+
   return (
-    <div className={`h-[324px] bg-white flex flex-col ${className}`.trim()}>
+    <Wrapper {...wrapperProps}>
       {/* image area */}
       <div className="w-full h-[162px] flex items-center justify-center overflow-hidden">
         <img src={image} alt="" className="h-[140px] w-auto object-contain" />
@@ -32,6 +41,6 @@ export default function ProductCard({
           </span>
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 }
