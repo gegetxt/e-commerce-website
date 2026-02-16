@@ -230,7 +230,7 @@ export default function Header() {
                         to="/orders"
                         className="block text-[14px] text-[#252B42] hover:text-[#23A6F0] py-1"
                       >
-                        Siparişlerim
+                        My Orders
                       </Link>
                       <button
                         type="button"

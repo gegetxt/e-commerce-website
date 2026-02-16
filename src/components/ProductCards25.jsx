@@ -55,21 +55,72 @@ export default function ProductCards25() {
       <div className="w-full max-w-[1440px] mx-auto px-4 py-[48px]">
         <div className="w-full max-w-[1077px] mx-auto flex flex-col lg:flex-row gap-[30px] items-start">
           {/* LEFT: products area */}
-          <div className="w-full lg:w-[658px]">
+          <div className="order-2 lg:order-1 w-full lg:w-[658px]">
             {/* Header row */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-[#252B42]">
-                BESTSELLER PRODUCTS
+            <div className="w-full">
+              {/* desktop */}
+              <div className="hidden md:flex items-center justify-between h-[50px]">
+                <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-[#252B42] whitespace-nowrap">
+                  BESTSELLER PRODUCTS
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-[15px]">
+                    {tabs.map((t, i) => (
+                      <button
+                        key={t}
+                        className={
+                          "text-[14px] leading-[24px] tracking-[0.2px] font-bold px-4 py-2 rounded-[37px] " +
+                          (i === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
+                        }
+                        type="button"
+                        onClick={() => setActiveTab(i)}
+                        aria-pressed={i === activeTab}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-[15px]">
+                    <button
+                      type="button"
+                      className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                      aria-label="Prev"
+                      onClick={() =>
+                        setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                      }
+                    >
+                      <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
+                        ‹
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                      aria-label="Next"
+                      onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                    >
+                      <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
+                        ›
+                      </span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* tabs */}
-                <div className="flex items-center gap-[15px]">
+              {/* mobile */}
+              <div className="md:hidden flex flex-col items-center gap-4 py-2">
+                <div className="font-bold text-[16px] leading-[24px] tracking-[0.1px] text-[#252B42] text-center">
+                  BESTSELLER PRODUCTS
+                </div>
+
+                <div className="flex items-center justify-center gap-[18px]">
                   {tabs.map((t, i) => (
                     <button
                       key={t}
                       className={
-                        "text-[14px] leading-[24px] tracking-[0.2px] font-bold px-4 py-2 rounded-[37px] " +
+                        "text-[14px] leading-[24px] tracking-[0.2px] font-bold " +
                         (i === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
                       }
                       type="button"
@@ -81,8 +132,7 @@ export default function ProductCards25() {
                   ))}
                 </div>
 
-                {/* arrows */}
-                <div className="flex items-center gap-[15px]">
+                <div className="mt-1 flex items-center justify-center gap-[15px]">
                   <button
                     type="button"
                     className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
@@ -97,11 +147,11 @@ export default function ProductCards25() {
                   </button>
                   <button
                     type="button"
-                    className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                    className="group w-[49px] h-[49px] border border-[#737373] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                     aria-label="Next"
                     onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
                   >
-                    <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
+                    <span className="text-[#737373] text-[18px] leading-none transition-colors duration-200">
                       ›
                     </span>
                   </button>
@@ -163,8 +213,8 @@ export default function ProductCards25() {
           </div>
   
             {/* RIGHT: banner card */}
-            <div className="w-full lg:w-[389px]">
-              <div className="w-full h-[520px] lg:h-[796px] border border-[#8EC2F2] bg-white overflow-hidden relative">
+            <div className="order-1 lg:order-2 w-full lg:w-[389px]">
+              <div className="w-full h-[700px] lg:h-[796px] border border-[#8EC2F2] bg-white overflow-hidden relative">
                 <img
                   src={rightBannerImg}
                   alt=""

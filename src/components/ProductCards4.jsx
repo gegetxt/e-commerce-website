@@ -72,7 +72,7 @@ export default function ProductCards4() {
         <div className="w-full max-w-[1440px] mx-auto px-4 py-[48px]">
           <div className="w-full max-w-[1069px] mx-auto flex flex-col md:flex-row items-stretch gap-6">
             {/* LEFT CARD */}
-            <div className="w-full md:w-[401px] bg-[#FAFAFA] flex items-center justify-center py-[80px]">
+            <div className="order-2 md:order-1 w-full md:w-[401px] bg-[#FAFAFA] flex items-center justify-center py-[80px]">
               <div className="w-full max-w-[348px] flex flex-col items-center gap-[19px]">
                 <h3 className="w-[200px] text-center font-bold text-[24px] leading-[32px] tracking-[0.1px] text-[#252B42]">
                   MOST POPULAR
@@ -124,7 +124,7 @@ export default function ProductCards4() {
             </div>
   
             {/* RIGHT IMAGE */}
-            <div className="w-full md:w-[674px]">
+            <div className="order-1 md:order-2 w-full md:w-[674px]">
               <div className="w-full h-[505px] md:h-[784px] overflow-hidden">
                 <img
                   src={mostPopularBannerImg}

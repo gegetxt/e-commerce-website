@@ -51,10 +51,10 @@ export default function ProductSection() {
       : "";
   return (
     <section className="w-full bg-white">
-      <div className="w-full max-w-[1077px] mx-auto px-4 py-[48px]">
+      <div className="w-full max-w-[1077px] mx-auto md:max-w-[1100px] px-4 py-[48px]">
         <div className="flex flex-col lg:flex-row gap-[30px] items-start">
           {/* LEFT BIG BANNER */}
-          <div className="w-full lg:w-[389px] h-[664px] lg:h-[796px] bg-white border border-[#8EC2F2] overflow-hidden relative">
+          <div className="w-full md:w-[400px] lg:w-[389px] h-[700px] lg:h-[796px] bg-white border border-[#8EC2F2] overflow-hidden relative">
             <img
               src={leftBannerImg}
               alt="Left banner"
@@ -74,21 +74,70 @@ export default function ProductSection() {
           {/* RIGHT PRODUCTS */}
           <div className="w-full lg:w-[658px] flex flex-col gap-[10px]">
             {/* top row: title + tabs + arrows */}
-            <div className="w-full flex items-center justify-between h-[50px]">
-              <div className="flex items-center">
-                <h3 className="font-bold tracking-[0.1px] text-[16px] leading-[24px] text-[#252B42]">
+            <div className="w-full">
+              {/* desktop */}
+              <div className="hidden md:flex items-center justify-between h-[50px]">
+                <div className="font-bold tracking-[0.1px] text-[16px] leading-[24px] text-[#252B42] whitespace-nowrap">
                   BESTSELLER PRODUCTS
-                </h3>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-[15px]">
+                    {tabs.map((tab, index) => (
+                      <button
+                        key={tab}
+                        className={
+                          "h-[44px] px-[20px] rounded-[37px] font-bold text-[14px] leading-[24px] tracking-[0.2px] " +
+                          (index === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
+                        }
+                        type="button"
+                        onClick={() => setActiveTab(index)}
+                        aria-pressed={index === activeTab}
+                      >
+                        {tab}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-[15px]">
+                    <button
+                      type="button"
+                      className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                      onClick={() =>
+                        setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                      }
+                    >
+                      <ChevronLeft
+                        className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373] group-hover:-translate-x-0.5"
+                        size={16}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                      onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                    >
+                      <ChevronRight
+                        className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373] group-hover:translate-x-0.5"
+                        size={16}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                {/* tabs */}
-                <div className="hidden sm:flex items-center gap-[15px]">
+              {/* mobile */}
+              <div className="md:hidden flex flex-col items-center gap-4 py-2">
+                <div className="font-bold tracking-[0.1px] text-[16px] leading-[24px] text-[#252B42] text-center">
+                  BESTSELLER PRODUCTS
+                </div>
+
+                <div className="flex items-center justify-center gap-[18px]">
                   {tabs.map((tab, index) => (
                     <button
                       key={tab}
                       className={
-                        "h-[44px] px-[20px] rounded-[37px] font-bold text-[14px] leading-[24px] tracking-[0.2px] " +
+                        "text-[14px] leading-[24px] tracking-[0.2px] font-bold " +
                         (index === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
                       }
                       type="button"
@@ -100,8 +149,7 @@ export default function ProductSection() {
                   ))}
                 </div>
 
-                {/* arrows */}
-                <div className="flex items-center gap-[15px]">
+                <div className="mt-1 flex items-center justify-center gap-[15px]">
                   <button
                     type="button"
                     className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
@@ -110,26 +158,23 @@ export default function ProductSection() {
                     }
                   >
                     <ChevronLeft
-                      className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373] group-hover:-translate-x-0.5"
+                      className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373]"
                       size={16}
                     />
                   </button>
                   <button
                     type="button"
-                    className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
+                    className="group w-[49px] h-[49px] border border-[#737373] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                     onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
                   >
-                    <ChevronRight
-                      className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373] group-hover:translate-x-0.5"
-                      size={16}
-                    />
+                    <ChevronRight className="text-[#737373] transition-colors duration-200" size={16} />
                   </button>
                 </div>
               </div>
             </div>
 
             {/* divider */}
-            <div className="w-full h-[2px] bg-[#ECECEC]" />
+            <div className="w-full h-[2px] bg-[#ECECEC] mt-4" />
 
             {/* products grid (3x2) */}
             <div className="w-full flex flex-col gap-[30px] pt-2">
@@ -155,7 +200,7 @@ export default function ProductSection() {
                       category={category}
                       oldPrice={oldPrice}
                       price={price}
-                      className="w-full max-w-[348px] sm:w-[calc(50%-15px)] lg:w-[183px]"
+                      className="w-full max-w-[348px] md:max-w-[500px] sm:w-[calc(50%-15px)] lg:w-[183px]"
                     />
                   );
                 })}

@@ -9,7 +9,7 @@ export default function ProductCard({
   className = "",
   to = "",
 }) {
-  const wrapperClassName = `h-[324px] bg-white flex flex-col ${className}`.trim();
+  const wrapperClassName = `h-[324px] lg:h-[340px] bg-white flex flex-col ${className}`.trim();
   const Wrapper = to ? Link : "div";
   const wrapperProps = to
     ? { to, className: wrapperClassName, "aria-label": title }
@@ -18,8 +18,8 @@ export default function ProductCard({
   return (
     <Wrapper {...wrapperProps}>
       {/* image area */}
-      <div className="w-full h-[162px] flex items-center justify-center overflow-hidden">
-        <img src={image} alt="" className="h-[140px] w-auto object-contain" />
+      <div className="w-full h-[162px] lg:h-[178px] flex items-center justify-center overflow-hidden">
+        <img src={image} alt="" className="h-[140px] lg:h-[156px] w-auto object-contain" />
       </div>
 
       {/* content */}
