@@ -29,8 +29,16 @@ const teamMembers = [
 function TeamCard({ member }) {
   return (
     <div className="w-full max-w-[329px] bg-white flex flex-col items-center">
-      <div className="w-full h-[231px] flex items-center justify-center overflow-hidden">
-        <img src={member.img} alt={member.name} className="w-full h-full object-cover" />
+      <div className="w-full h-[180px] flex items-center justify-center overflow-hidden">
+        <img
+          src={member.img}
+          alt={member.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          width={329}
+          height={180}
+        />
       </div>
       <div className="w-full h-[152px] flex flex-col items-center justify-center gap-[10px] px-[30px]">
         <h5 className="text-[#252B42] font-bold text-[16px] leading-[24px] tracking-[0.1px] text-center">

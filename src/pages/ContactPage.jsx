@@ -58,7 +58,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="w-full md:w-[415px] h-[440px] md:h-[612px] relative flex items-center justify-center">
+            <div className="w-full md:w-[460px] h-[470px] md:h-[660px] relative flex items-center justify-center">
               <div className="absolute left-[40px] top-[36px] md:left-[58px] md:top-0 w-[295px] h-[295px] md:w-[484px] md:h-[484px] rounded-full bg-[#FFE9EA]" />
               <div className="absolute left-[4px] top-[43px] md:left-0 md:top-[12px] w-[47px] h-[47px] md:w-[77px] md:h-[77px] rounded-full bg-[#FFE9EA]" />
               <div className="absolute right-[20px] top-[186px] md:right-[16px] md:top-[248px] w-[18px] h-[18px] md:w-[30px] md:h-[30px] rounded-full bg-[#FFE9EA]" />
@@ -68,7 +68,7 @@ export default function ContactPage() {
               <img
                 src={heroImg}
                 alt="Contact illustration"
-                className="relative z-10 w-[376px] md:w-[571px] h-auto"
+                className="relative z-10 w-[1000px] md:w-[1000px] md:h-[800px] h-[620px]"
               />
             </div>
           </div>

@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import chickenNuggetsImg from "../assets/images/theChickenNuggets.png";
-
+import { Link } from "react-router-dom";
 export default function HeroSlider() {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -48,23 +48,26 @@ export default function HeroSlider() {
                 <div className="absolute inset-0 bg-black/35" />
 
                 <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4">
-                  <div className="w-full max-w-[701px] flex flex-col items-center gap-[24px]">
+                  <div className="w-full max-w-[280px] md:max-w-[701px] flex flex-col items-center gap-[24px]">
                     <h1 className="text-white text-center font-bold tracking-[0.2px] text-[40px] leading-[50px] md:text-[58px] md:leading-[80px]">
                       {slide.title}
                     </h1>
 
-                    <p className="text-white text-center font-normal tracking-[0.2px] text-[20px] leading-[30px] max-w-[536px]">
+                    <p className="text-white text-center font-normal tracking-[0.2px] text-[18px] md:text-[20px] leading-[30px] max-w-[536px]">
                       {slide.description}
                     </p>
 
-                    <button
-                      type="button"
-                      className="h-[62px] w-[204px] md:w-auto px-[40px] bg-[#23A6F0] rounded-[5px] flex items-center justify-center"
-                    >
-                      <span className="text-white font-bold tracking-[0.1px] text-[24px] leading-[32px]">
-                        {slide.button}
-                      </span>
-                    </button>
+                    <Link
+  to="/shop"
+  className="h-[62px] w-[204px] md:w-auto px-[30px]
+             bg-[#23A6F0] rounded-[5px]
+             flex items-center justify-center
+             hover:bg-[#1e8fd1] transition-colors"
+>
+  <span className="text-white font-bold tracking-[0.1px] text-[24px] leading-[32px]">
+    {slide.button}
+  </span>
+</Link>
                   </div>
                 </div>
               </div>
@@ -78,7 +81,7 @@ export default function HeroSlider() {
           aria-label="Previous"
           onClick={() => swiperRef.current?.slidePrev()}
         >
-          <ChevronLeft className="text-white" size={44} />
+          <ChevronLeft className="text-white" size={45} />
         </button>
 
         <button
@@ -87,7 +90,7 @@ export default function HeroSlider() {
           aria-label="Next"
           onClick={() => swiperRef.current?.slideNext()}
         >
-          <ChevronRight className="text-white" size={44} />
+          <ChevronRight className="text-white" size={45} />
         </button>
 
         <div className="absolute bottom-[25px] left-1/2 -translate-x-1/2 flex items-center">

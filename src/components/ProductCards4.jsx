@@ -1,7 +1,72 @@
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { api } from "../api/axios";
 import mostPopularProductImg from "../assets/images/most-popular-product.jpg";
 import mostPopularBannerImg from "../assets/images/most-popular-banner.png";
+import productPlaceholder from "../assets/images/vegan-milk.jpg";
 
 export default function ProductCards4() {
+    const [featuredProduct, setFeaturedProduct] = useState(null);
+    const categories = useSelector((s) => s.product.categories) || [];
+
+    const categoryMap = useMemo(() => {
+      const map = new Map();
+      categories.forEach((c) => {
+        if (c?.id != null) {
+          map.set(c.id, c.title || c.name || c.categoryName);
+        }
+      });
+      return map;
+    }, [categories]);
+
+    useEffect(() => {
+      let isMounted = true;
+
+      const fetchTopRated = async () => {
+        try {
+          const res = await api.get("/products");
+          const list = res.data?.products || res.data || [];
+          const map = new Map();
+
+          list.forEach((p) => {
+            const key = p?.category_id ?? p?.category?.id ?? "unknown";
+            const current = map.get(key);
+            if (!current || (p?.rating ?? 0) > (current?.rating ?? 0)) {
+              map.set(key, p);
+            }
+          });
+
+          const topByCategory = Array.from(map.values()).sort(
+            (a, b) => (b.rating ?? 0) - (a.rating ?? 0)
+          );
+          if (isMounted) {
+            const pick = topByCategory[1] || topByCategory[0] || null;
+            setFeaturedProduct(pick);
+          }
+        } catch (e) {
+          console.error(e);
+          if (isMounted) setFeaturedProduct(null);
+        }
+      };
+
+      fetchTopRated();
+      return () => {
+        isMounted = false;
+      };
+    }, []);
+
+    const featuredImage =
+      featuredProduct?.images?.[0]?.url ||
+      featuredProduct?.images?.[0] ||
+      featuredProduct?.image ||
+      mostPopularProductImg ||
+      productPlaceholder;
+    const featuredCategory =
+      featuredProduct?.category?.title ||
+      featuredProduct?.category?.name ||
+      categoryMap.get(featuredProduct?.category_id) ||
+      "Kategori";
+
     return (
       <section className="w-full bg-white">
         <div className="w-full max-w-[1440px] mx-auto px-4 py-[48px]">
@@ -18,16 +83,16 @@ export default function ProductCards4() {
                 </p>
   
                 {/* image area */}
-                <div className="w-full h-[300px] flex items-center justify-center">
+                <div className="w-full h-[300px] flex items-center justify-center overflow-hidden">
                   <img
-                    src={mostPopularProductImg}
+                    src={featuredImage}
                     alt=""
-                    className="w-[220px] h-auto object-contain"
+                    className="max-w-[220px] max-h-[260px] w-auto h-auto object-contain"
                   />
                 </div>
   
                 <div className="font-bold text-[14px] leading-[24px] tracking-[0.2px] text-[#252B42] text-center">
-                  English Department
+                  {featuredCategory}
                 </div>
   
                 {/* sales row */}

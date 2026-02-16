@@ -1,7 +1,73 @@
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { api } from "../api/axios";
 import mostPopularLeftImg from "../assets/images/most-popular-left.jpg";
 import mostPopularProductImg from "../assets/images/most-popular-product.png";
+import productPlaceholder from "../assets/images/vegan-milk.jpg";
 
 export default function MostPopularSection() {
+    const [featuredProduct, setFeaturedProduct] = useState(null);
+    const categories = useSelector((s) => s.product.categories) || [];
+
+    const categoryMap = useMemo(() => {
+      const map = new Map();
+      categories.forEach((c) => {
+        if (c?.id != null) {
+          map.set(c.id, c.title || c.name || c.categoryName);
+        }
+      });
+      return map;
+    }, [categories]);
+    const [featuredCategoryId, setFeaturedCategoryId] = useState(null);
+
+    useEffect(() => {
+      let isMounted = true;
+
+      const fetchTopRated = async () => {
+        try {
+          const res = await api.get("/products");
+          const list = res.data?.products || res.data || [];
+          const map = new Map();
+
+          list.forEach((p) => {
+            const key = p?.category_id ?? p?.category?.id ?? "unknown";
+            const current = map.get(key);
+            if (!current || (p?.rating ?? 0) > (current?.rating ?? 0)) {
+              map.set(key, p);
+            }
+          });
+
+          const topByCategory = Array.from(map.values()).sort(
+            (a, b) => (b.rating ?? 0) - (a.rating ?? 0)
+          );
+          if (isMounted) {
+            const selected = topByCategory[0] || null;
+            setFeaturedProduct(selected);
+            setFeaturedCategoryId(selected?.category_id ?? selected?.category?.id ?? null);
+          }
+        } catch (e) {
+          console.error(e);
+          if (isMounted) setFeaturedProduct(null);
+        }
+      };
+
+      fetchTopRated();
+      return () => {
+        isMounted = false;
+      };
+    }, []);
+
+    const featuredImage =
+      featuredProduct?.images?.[0]?.url ||
+      featuredProduct?.images?.[0] ||
+      featuredProduct?.image ||
+      mostPopularProductImg ||
+      productPlaceholder;
+    const featuredCategory =
+      featuredProduct?.category?.title ||
+      featuredProduct?.category?.name ||
+      categoryMap.get(featuredProduct?.category_id) ||
+      "Kategori";
     const features = [
       { no: "1.", title: "Easy to use", desc: "Things on a very small that you have any direct" },
       { no: "2.", title: "Easy to use", desc: "Things on a very small that you have any direct" },
@@ -36,16 +102,16 @@ export default function MostPopularSection() {
                   We focus on ergonomics and meeting you where you work. It&apos;s only a keystroke away.
                 </p>
   
-                <div className="w-[348px] h-[300px] flex items-center justify-center">
+                <div className="w-[348px] h-[300px] flex items-center justify-center overflow-hidden">
                   <img
-                    src={mostPopularProductImg}
+                    src={featuredImage}
                     alt=""
-                    className="w-[260px] h-auto object-contain"
+                    className="max-w-[260px] max-h-[260px] w-auto h-auto object-contain"
                   />
                 </div>
   
                 <p className="font-bold text-[14px] leading-[24px] tracking-[0.2px] text-center text-[#252B42]">
-                  English Department
+                  {featuredCategory}
                 </p>
   
                 <div className="flex gap-[5px] px-[3px] py-[5px]">
