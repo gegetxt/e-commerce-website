@@ -1,18 +1,29 @@
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
-import heroLargeImg from "../assets/images/happy-family-shopping-cart-buying-food.jpg";
 import heroSmall1 from "../assets/images/veggies-section.jpg";
 import heroSmall2 from "../assets/images/coffee-section.jpg";
 import heroSmall3 from "../assets/images/cheese-section.jpg";
-import heroSmall4 from "../assets/images/shopping-cart-aisle.jpg";
-import teamImg1 from "../assets/images/man-1.jpg";
-import teamImg2 from "../assets/images/man-2.jpg";
-import teamImg3 from "../assets/images/woman-3.jpg";
-import teamImg4 from "../assets/images/woman-4.jpg";
-import teamImg5 from "../assets/images/man-4.jpg";
-import teamImg6 from "../assets/images/woman-2.jpg";
 import teamImg7 from "../assets/images/gizemg.jpg";
-import teamImg8 from "../assets/images/woman-1.jpg";
-import teamImg9 from "../assets/images/man-3.jpg";
+
+const heroLargeImg =
+  "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1600&q=75";
+const heroSmall4 =
+  "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=75";
+const teamImg1 =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=75";
+const teamImg2 =
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=75";
+const teamImg3 =
+  "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=75";
+const teamImg4 =
+  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=75";
+const teamImg5 =
+  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=75";
+const teamImg6 =
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=75";
+const teamImg8 =
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=75";
+const teamImg9 =
+  "https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=900&q=75";
 
 const teamMembers = [
   { id: 1, name: "Gokhan Gundogdu", role: "UI Engineer", img: teamImg1 },

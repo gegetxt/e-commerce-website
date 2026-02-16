@@ -1,12 +1,18 @@
 import { Facebook, Instagram, Linkedin, Play, Twitter } from "lucide-react";
 import Clients from "../components/Clients.jsx";
-import heroImg from "../assets/images/girl-with-shopping-bag.png";
 import videoThumb from "../assets/images/most-popular-left.jpg";
-import testimonialImg from "../assets/images/woman-1.jpg";
-import teamImg1 from "../assets/images/woman-2.jpg";
-import teamImg2 from "../assets/images/man-2.jpg";
-import teamImg3 from "../assets/images/man-1.jpg";
 import { Link } from "react-router-dom";
+
+const heroImg =
+  "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=75";
+const testimonialImg =
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=75";
+const teamImg1 =
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=75";
+const teamImg2 =
+  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=75";
+const teamImg3 =
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=75";
 
 const stats = [
   { value: "15K", label: "Happy Customers" },
