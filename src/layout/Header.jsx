@@ -317,7 +317,9 @@ export default function Header() {
 
               {cartOpen && (
                 <div
-                  className="absolute right-0 top-full mt-3 w-[360px] bg-white shadow-lg rounded-lg p-4 z-50"
+                  className={`absolute right-0 top-full mt-1 bg-white shadow-lg rounded-lg p-4 z-50 ${
+                    cart.length ? "w-[360px]" : "w-[220px]"
+                  }`}
                   onMouseEnter={() => setCartOpen(true)}
                   onMouseLeave={() => setCartOpen(false)}
                 >
@@ -386,7 +388,7 @@ export default function Header() {
               )}
               {cartOpen && (
                 <div
-                  className="absolute right-0 top-full h-3 w-[360px]"
+                  className="absolute right-0 top-full h-1 w-[360px]"
                   onMouseEnter={() => setCartOpen(true)}
                   onMouseLeave={() => setCartOpen(false)}
                 />

@@ -2,10 +2,10 @@ import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import heroSmall1 from "../assets/images/veggies-section.jpg";
 import heroSmall2 from "../assets/images/coffee-section.jpg";
 import heroSmall3 from "../assets/images/cheese-section.jpg";
+import heroLargeImg from "../assets/images/happy-family-shopping-cart-buying-food.jpg";
 import teamImg7 from "../assets/images/gizemg.JPG";
 
-const heroLargeImg =
-  "https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1600&q=75";
+
 const heroSmall4 =
   "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=75";
 const teamImg1 =

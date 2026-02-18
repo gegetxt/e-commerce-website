@@ -2,6 +2,7 @@ import { Facebook, Instagram, Linkedin, Play, Twitter } from "lucide-react";
 import Clients from "../components/Clients.jsx";
 import videoThumb from "../assets/images/most-popular-left.jpg";
 import heroImg from "../assets/images/girl-with-shopping-bag.png";
+
 import { Link } from "react-router-dom";
 
 const testimonialImg =
