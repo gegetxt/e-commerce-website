@@ -1,10 +1,9 @@
 import { Facebook, Instagram, Linkedin, Play, Twitter } from "lucide-react";
 import Clients from "../components/Clients.jsx";
 import videoThumb from "../assets/images/most-popular-left.jpg";
+import heroImg from "../assets/images/girl-with-shopping-bag.png";
 import { Link } from "react-router-dom";
 
-const heroImg =
-  "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=75";
 const testimonialImg =
   "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=75";
 const teamImg1 =

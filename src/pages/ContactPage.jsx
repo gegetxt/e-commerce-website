@@ -1,7 +1,5 @@
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
-
-const heroImg =
-  "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1400&q=75";
+import heroImg from "../assets/images/happy-family.png";
 
 const contactCards = [
   {
