@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import rightBannerImg from "../assets/images/right-banner.jpg";
@@ -178,8 +179,9 @@ export default function ProductCards25() {
                   : "";
 
                 return (
-                  <div
+                  <Link
                     key={p.id}
+                    to={`/product/${p.id}`}
                     className="w-full max-w-[348px] md:w-[183px] md:max-w-none bg-white flex flex-col"
                   >
                     <div className="w-full h-[162px] bg-white flex items-center justify-center">
@@ -206,7 +208,7 @@ export default function ProductCards25() {
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

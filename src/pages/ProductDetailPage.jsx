@@ -18,6 +18,8 @@ import { toast } from "react-toastify";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 
+const FAVORITES_STORAGE_KEY = "favoriteProductIds";
+
 function ColorDot({ color, isSelected, onClick }) {
   return (
     <button
@@ -45,7 +47,7 @@ function BestsellerCard({ product, categoryName }) {
     "Kategori";
 
   return (
-    <div className="w-full max-w-[239px] bg-white flex flex-col">
+    <Link to={`/product/${product?.id}`} className="w-full max-w-[239px] bg-white flex flex-col">
       <div className="w-full h-[280px] flex items-center justify-center overflow-hidden">
         <img src={image} alt={title} className="h-[220px] w-auto object-contain" />
       </div>
@@ -65,7 +67,7 @@ function BestsellerCard({ product, categoryName }) {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -81,6 +83,23 @@ export default function ProductDetailPage() {
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isQuickView, setIsQuickView] = useState(false);
+
+  useEffect(() => {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const ids = raw ? JSON.parse(raw) : [];
+    setIsFavorite(ids.includes(String(productId)));
+  }, [productId]);
+
+  const toggleFavorite = () => {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const ids = raw ? JSON.parse(raw) : [];
+    const idAsString = String(productId);
+    const exists = ids.includes(idAsString);
+    const next = exists ? ids.filter((id) => id !== idAsString) : [...ids, idAsString];
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
+    setIsFavorite(!exists);
+    window.dispatchEvent(new Event("favorites:changed"));
+  };
 
   useEffect(() => {
     dispatch(fetchProductDetailThunk(productId));
@@ -249,7 +268,7 @@ export default function ProductDetailPage() {
                   type="button"
                   className="w-[40px] h-[40px] rounded-full border border-[#E8E8E8] flex items-center justify-center"
                   aria-label="Add to wishlist"
-                  onClick={() => setIsFavorite((prev) => !prev)}
+                  onClick={toggleFavorite}
                 >
                   <Heart
                     size={18}

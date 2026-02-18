@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, User, ChevronDown, Search, ShoppingCart, Phone, Mail } from "lucide-react";
 import { SiInstagram, SiYoutube, SiFacebook, SiX } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,12 +27,22 @@ function toGenderSlug(gender) {
 }
 
 const STATIC_AVATAR_EMAIL = "gizemgunduz77@gmail.com";
+const FAVORITES_STORAGE_KEY = "favoriteProductIds";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(() => {
+    try {
+      const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+      const ids = raw ? JSON.parse(raw) : [];
+      return Array.isArray(ids) ? ids.length : 0;
+    } catch {
+      return 0;
+    }
+  });
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -52,6 +62,27 @@ export default function Header() {
   const womenCats = (categories || []).filter((c) => toGenderSlug(c.gender) === "kadin");
   const menCats = (categories || []).filter((c) => toGenderSlug(c.gender) === "erkek");
   const cartCount = cart.reduce((sum, item) => sum + (item?.count || 0), 0);
+
+  useEffect(() => {
+    const syncFavoriteCount = () => {
+      try {
+        const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+        const ids = raw ? JSON.parse(raw) : [];
+        setFavoriteCount(Array.isArray(ids) ? ids.length : 0);
+      } catch {
+        setFavoriteCount(0);
+      }
+    };
+
+    window.addEventListener("favorites:changed", syncFavoriteCount);
+    window.addEventListener("storage", syncFavoriteCount);
+    syncFavoriteCount();
+
+    return () => {
+      window.removeEventListener("favorites:changed", syncFavoriteCount);
+      window.removeEventListener("storage", syncFavoriteCount);
+    };
+  }, []);
 
   return (
     <header className="w-full">
@@ -127,7 +158,7 @@ export default function Header() {
 
               {shopOpen && (
                 <div
-                  className="absolute left-0 top-full mt-3 w-[520px] bg-white shadow-lg rounded-lg p-8 z-50"
+                  className="absolute left-0 top-full mt-3 w-[240px] bg-white shadow-lg rounded-lg p-6 z-50"
                   onMouseEnter={() => setShopOpen(true)}
                   onMouseLeave={() => setShopOpen(false)}
                 >
@@ -182,7 +213,7 @@ export default function Header() {
               )}
               {shopOpen && (
                 <div
-                  className="absolute left-0 top-full h-3 w-[520px]"
+                  className="absolute left-0 top-full h-3 w-[430px]"
                   onMouseEnter={() => setShopOpen(true)}
                   onMouseLeave={() => setShopOpen(false)}
                 />
@@ -222,19 +253,19 @@ export default function Header() {
                   </div>
                   {userMenuOpen && (
                     <div
-                      className="absolute left-0 top-full mt-2 w-[180px] bg-white shadow-lg rounded-lg p-3 z-50"
+                      className="absolute left-[40px] top-full mt-2 w-[210px] bg-white border border-[#E6E6E6] shadow-[0_10px_25px_rgba(0,0,0,0.08)] rounded-[10px] p-2 z-50"
                       onMouseEnter={() => setUserMenuOpen(true)}
                       onMouseLeave={() => setUserMenuOpen(false)}
                     >
                       <Link
                         to="/orders"
-                        className="block text-[14px] text-[#252B42] hover:text-[#23A6F0] py-1"
+                        className="block rounded-[8px] px-3 py-2 text-[15px] font-semibold text-[#252B42] hover:bg-[#F6F6F6] hover:text-[#23A6F0] transition-colors"
                       >
                         My Orders
                       </Link>
                       <button
                         type="button"
-                        className="block w-full text-left text-[14px] text-[#252B42] hover:text-[#23A6F0] py-1"
+                        className="mt-1 block w-full rounded-[8px] px-3 py-2 text-left text-[15px] font-semibold text-[#252B42] hover:bg-[#F6F6F6] hover:text-[#23A6F0] transition-colors"
                         onClick={() => {
                           localStorage.removeItem("token");
                           clearAuthToken();
@@ -248,7 +279,7 @@ export default function Header() {
                   )}
                   {userMenuOpen && (
                     <div
-                      className="absolute left-0 top-full h-2 w-[180px]"
+                      className="absolute left-[40px] top-full h-2 w-[210px]"
                       onMouseEnter={() => setUserMenuOpen(true)}
                       onMouseLeave={() => setUserMenuOpen(false)}
                     />
@@ -368,7 +399,7 @@ export default function Header() {
               aria-label="Favorites"
             >
               <Heart size={20} strokeWidth={2} color="#23A6F0" />
-              <span className="text-[12px] leading-[16px] text-[#23A6F0]">1</span>
+              <span className="text-[12px] leading-[16px] text-[#23A6F0]">{favoriteCount}</span>
             </button>
 
             {/* MOBILE: icons */}
@@ -474,7 +505,7 @@ export default function Header() {
               <button type="button" className="relative p-2" aria-label="Favorites">
                 <Heart size={26} strokeWidth={2} color="#23A6F0" />
                 <span className="absolute -right-1 -top-1 text-[12px] leading-[16px] text-[#23A6F0]">
-                  1
+                  {favoriteCount}
                 </span>
               </button>
             </div>

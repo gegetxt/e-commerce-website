@@ -29,7 +29,7 @@ export default function ShoppingCartPage() {
   return (
     <div className="w-full bg-white">
       <section className="w-full bg-[#FAFAFA]">
-        <div className="max-w-[1050px] mx-auto px-4 py-[24px]">
+        <div className="max-w-[1070px] mx-auto px-4 py-[24px]">
           <h2 className="text-[24px] leading-[32px] tracking-[0.1px] font-bold text-[#252B42]">
             Sepetim
           </h2>
@@ -37,18 +37,18 @@ export default function ShoppingCartPage() {
       </section>
 
       <section className="w-full bg-white">
-        <div className="max-w-[1050px] mx-auto px-4 py-[32px]">
+        <div className="max-w-[1070px] mx-auto px-4 py-[32px]">
           {cart.length === 0 ? (
             <div className="text-center text-[#737373] py-12">Sepet boş.</div>
           ) : (
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 flex flex-col gap-4">
-                <div className="hidden md:grid grid-cols-[40px_1.4fr_140px_140px_140px_60px] gap-4 text-[12px] font-bold text-[#737373]">
+                <div className="hidden md:grid grid-cols-[40px_2.4fr_140px_140px_140px_60px] gap-4 text-[12px] font-bold text-[#737373]">
                   <div />
-                  <div>Ürün</div>
-                  <div className="text-center">Fiyat</div>
-                  <div className="text-center">Adet</div>
-                  <div className="text-center">Toplam</div>
+                  <div className="pl-4">Ürün</div>
+                  <div className="text-center -ml-12">Fiyat</div>
+                  <div className="text-center -ml-8" >Adet</div>
+                  <div className="text-center -ml-10">Toplam</div>
                   <div />
                 </div>
 
@@ -138,12 +138,6 @@ export default function ShoppingCartPage() {
 
               <div className="w-full lg:w-[320px]">
                 <div className="sticky top-[24px] flex flex-col gap-4">
-                  <Link
-                    to="/order"
-                    className="h-[44px] bg-[#F28F6B] text-white rounded-[6px] font-bold flex items-center justify-center"
-                  >
-                    Siparişi Onayla
-                  </Link>
                   <div className="border border-[#E6E6E6] rounded-[6px] p-4 bg-white">
                     <div className="text-[16px] font-bold text-[#252B42] mb-3">
                       Sipariş Özeti

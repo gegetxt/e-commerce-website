@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 
@@ -62,7 +63,11 @@ export default function BestsellerProducts() {
         {/* cards row */}
         <div className="w-full max-w-[1049px] flex flex-wrap justify-center gap-[30px] lg:flex-nowrap lg:justify-between">
           {products.map((p) => (
-            <div key={p.id} className="w-full max-w-[240px] flex flex-col lg:flex-1 lg:max-w-none">
+            <Link
+              key={p.id}
+              to={`/product/${p.id}`}
+              className="w-full max-w-[240px] flex flex-col lg:flex-1 lg:max-w-none"
+            >
               {/* image box */}
               <div className="w-full h-[280px] bg-white flex items-center justify-center">
                 <img
@@ -91,7 +96,7 @@ export default function BestsellerProducts() {
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

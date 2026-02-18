@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   createAddressThunk,
   deleteAddressThunk,
@@ -49,6 +50,7 @@ const CVV_STORAGE_KEY = "cardCvvByNo";
 
 export default function CreateOrderPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const addressList = useSelector((s) => s.client.addressList) || [];
   const creditCards = useSelector((s) => s.client.creditCards) || [];
   const cart = useSelector((s) => s.shoppingCart.cart) || [];
@@ -216,7 +218,9 @@ export default function CreateOrderPage() {
       return;
     }
 
-    const products = cart
+    const selectedCartItems = cart.filter((item) => item.checked);
+
+    const products = selectedCartItems
       .filter((item) => item.checked)
       .map((item) => ({
         product_id: item.product?.id,
@@ -244,9 +248,42 @@ export default function CreateOrderPage() {
 
     const result = await dispatch(createOrderThunk(payload));
     if (result.ok) {
+      const selectedAddress = addressList.find((address) => address.id === selectedShippingId);
+      const last4 = String(selectedCard.card_no || "").slice(-4);
+      const orderItems = selectedCartItems.map((item) => ({
+        id: item.product?.id,
+        name: item.product?.name || item.product?.title || "Ürün",
+        detail: item.product?.detail || "",
+        count: item.count,
+        price: Number(item.product?.price) || 0,
+        image:
+          item.product?.images?.[0]?.url ||
+          item.product?.images?.[0] ||
+          item.product?.image ||
+          "",
+      }));
+      const generatedOrderNo = `#B${Date.now().toString().slice(-5)}`;
+
       toast.success("Siparişiniz başarıyla oluşturuldu. Teşekkürler!");
       dispatch(clearCart());
       setCardCvv("");
+      navigate("/order-success", {
+        replace: true,
+        state: {
+          orderNo: generatedOrderNo,
+          totalPrice: grandTotal,
+          itemCount: products.length,
+          orderDate: payload.order_date,
+          shippingAddress: selectedAddress
+            ? `${selectedAddress.neighborhood}, ${selectedAddress.district} / ${selectedAddress.city}`
+            : "",
+          receiverName: selectedAddress
+            ? `${selectedAddress.name} ${selectedAddress.surname}`
+            : "",
+          paymentMethod: last4 ? `**** **** **** ${last4}` : "",
+          orderItems,
+        },
+      });
     } else {
       toast.error("Sipariş oluşturulamadı.");
     }
@@ -255,7 +292,7 @@ export default function CreateOrderPage() {
   return (
     <div className="w-full bg-white">
       <section className="w-full bg-[#FAFAFA]">
-        <div className="max-w-[1150px] mx-auto px-4 py-[24px]">
+        <div className="max-w-[1070px] mx-auto px-4 py-[24px]">
           <h2 className="text-[24px] leading-[32px] tracking-[0.1px] font-bold text-[#252B42]">
             Sipariş Oluştur
           </h2>
@@ -263,7 +300,7 @@ export default function CreateOrderPage() {
       </section>
 
       <section className="w-full bg-white">
-        <div className="max-w-[1150px] mx-auto px-4 py-[32px] flex flex-col lg:flex-row gap-6">
+        <div className="max-w-[1070px] mx-auto px-4 py-[32px] flex flex-col lg:flex-row gap-6">
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <button
@@ -705,7 +742,7 @@ export default function CreateOrderPage() {
                   </form>
                 )}
 
-                <div className="flex justify-between">
+                <div className="flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setStep(1)}

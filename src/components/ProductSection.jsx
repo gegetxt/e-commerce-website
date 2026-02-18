@@ -195,6 +195,7 @@ export default function ProductSection() {
                   return (
                     <ProductCard
                       key={p.id}
+                    to={`/product/${p.id}`}
                       image={image}
                       title={p.name}
                       category={category}

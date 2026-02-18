@@ -5,6 +5,7 @@ import ProductDetailPage from "../pages/ProductDetailPage.jsx";
 import ShoppingCartPage from "../pages/ShoppingCartPage.jsx";
 import CreateOrderPage from "../pages/CreateOrderPage.jsx";
 import PreviousOrdersPage from "../pages/PreviousOrdersPage.jsx";
+import OrderSuccessPage from "../pages/OrderSuccessPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
 import TeamPage from "../pages/TeamPage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
@@ -43,6 +44,14 @@ export default function PageContent() {
           element={
             <ProtectedRoute>
               <PreviousOrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-success"
+          element={
+            <ProtectedRoute>
+              <OrderSuccessPage />
             </ProtectedRoute>
           }
         />
