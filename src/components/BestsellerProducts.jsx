@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
-import { BESTSELLER_FETCH_LIMIT } from "../utils/bestsellerProducts";
+import {
+  BESTSELLER_FETCH_LIMIT,
+  getCategoryDistinctBestSellers,
+} from "../utils/bestsellerProducts";
 import { fetchProductsCached } from "../utils/productRequests";
 
 export default function BestsellerProducts() {
@@ -28,9 +31,7 @@ export default function BestsellerProducts() {
           limit: BESTSELLER_FETCH_LIMIT,
           offset: 0,
         });
-        const top4 = [...list]
-          .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
-          .slice(0, 4);
+        const top4 = getCategoryDistinctBestSellers(list, 4);
 
         if (isMounted) setProducts(top4);
       } catch (e) {
