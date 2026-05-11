@@ -12,10 +12,7 @@ import {
 } from "./productActions";
 
 export const fetchCategoriesThunk = () => {
-  return async (dispatch, getState) => {
-    const { categories } = getState().product;
-    if (categories && categories.length) return; // ihtiyaç yoksa tekrar çekme
-
+  return async (dispatch) => {
     try {
       dispatch(setFetchState("FETCHING"));
       const res = await api.get("/categories");
@@ -81,7 +78,8 @@ export const fetchAddressListThunk = () => {
   return async (dispatch) => {
     try {
       const res = await api.get("/user/address");
-      dispatch(setAddressList(res.data || []));
+      const list = res.data ? Object.values(res.data) : [];
+      dispatch(setAddressList(list));
       return { ok: true };
     } catch (e) {
       console.error(e);
@@ -133,7 +131,8 @@ export const fetchCardsThunk = () => {
   return async (dispatch) => {
     try {
       const res = await api.get("/user/card");
-      dispatch(setCreditCards(res.data || []));
+      const list = res.data ? Object.values(res.data) : [];
+      dispatch(setCreditCards(list));
       return { ok: true };
     } catch (e) {
       console.error(e);
@@ -195,13 +194,20 @@ export const fetchOrdersThunk = () => {
 };
 
 export const createOrderThunk = (payload) => {
-  return async (dispatch) => {
+  return async () => {
     try {
       const res = await api.post("/order", payload);
       return { ok: true, data: res.data };
     } catch (e) {
       console.error(e);
-      return { ok: false };
+      return {
+        ok: false,
+        message:
+          e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          e?.response?.data?.errors?.[0]?.defaultMessage ||
+          "Siparis olusturulamadi.",
+      };
     }
   };
 };
@@ -237,7 +243,7 @@ export const verifyTokenThunk = () => {
       }
 
       return { ok: true, user };
-    } catch (err) {
+    } catch {
       // 5) yetkisizse token temizle
       localStorage.removeItem("token");
       clearAuthToken();
@@ -288,9 +294,8 @@ export const fetchRolesIfNeeded = () => {
 
     try {
       // ÖRNEK endpoint: kendi backend'ine göre değiştir
-      const res = await fetch("/api/roles");
-      if (!res.ok) throw new Error("Roles fetch failed");
-      const data = await res.json();
+      const res = await api.get("/roles");
+      const data = Array.isArray(res.data) ? res.data : [];
 
       dispatch(setRoles(data));
     } catch (err) {

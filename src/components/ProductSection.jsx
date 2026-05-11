@@ -5,32 +5,35 @@ import ProductCard from "./ProductCard.jsx";
 import leftBannerImg from "../assets/images/left-banner.jpg";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import { api } from "../api/axios";
+import {
+  BESTSELLER_FETCH_LIMIT,
+  BESTSELLER_TABS,
+  buildCategoryById,
+  getBestSellerProductsForTab,
+  getCategoryTitle,
+} from "../utils/bestsellerProducts";
+
 export default function ProductSection() {
   const [products, setProducts] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  const tabs = ["Men", "Women", "Accessories"];
-  const categories = useSelector((s) => s.product.categories) || [];
+  const categories = useSelector((s) => s.product.categories);
 
-  const categoryMap = useMemo(() => {
-    const map = new Map();
-    categories.forEach((c) => {
-      if (c?.id != null) {
-        map.set(c.id, c.title || c.name || c.categoryName);
-      }
-    });
-    return map;
-  }, [categories]);
+  const categoryById = useMemo(() => buildCategoryById(categories), [categories]);
+
+  const visibleProducts = useMemo(
+    () => getBestSellerProductsForTab(products, categoryById, activeTab),
+    [products, categoryById, activeTab]
+  );
 
   useEffect(() => {
     let isMounted = true;
     const fetchTopProducts = async () => {
       try {
-        const res = await api.get("/products");
+        const res = await api.get("/products", {
+          params: { limit: BESTSELLER_FETCH_LIMIT, offset: 0 },
+        });
         const list = res.data?.products || res.data || [];
-        const top6 = [...list]
-          .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
-          .slice(0, 6);
-        if (isMounted) setProducts(top6);
+        if (isMounted) setProducts(list);
       } catch (e) {
         console.error(e);
         if (isMounted) setProducts([]);
@@ -83,9 +86,9 @@ export default function ProductSection() {
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-[15px]">
-                    {tabs.map((tab, index) => (
+                    {BESTSELLER_TABS.map((tab, index) => (
                       <button
-                        key={tab}
+                        key={tab.label}
                         className={
                           "h-[44px] px-[20px] rounded-[37px] font-bold text-[14px] leading-[24px] tracking-[0.2px] " +
                           (index === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
@@ -94,7 +97,7 @@ export default function ProductSection() {
                         onClick={() => setActiveTab(index)}
                         aria-pressed={index === activeTab}
                       >
-                        {tab}
+                        {tab.label}
                       </button>
                     ))}
                   </div>
@@ -104,7 +107,9 @@ export default function ProductSection() {
                       type="button"
                       className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                       onClick={() =>
-                        setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                        setActiveTab(
+                          (prev) => (prev - 1 + BESTSELLER_TABS.length) % BESTSELLER_TABS.length
+                        )
                       }
                     >
                       <ChevronLeft
@@ -115,7 +120,9 @@ export default function ProductSection() {
                     <button
                       type="button"
                       className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
-                      onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                      onClick={() =>
+                        setActiveTab((prev) => (prev + 1) % BESTSELLER_TABS.length)
+                      }
                     >
                       <ChevronRight
                         className="text-[#BDBDBD] transition-colors duration-200 group-hover:text-[#737373] group-hover:translate-x-0.5"
@@ -133,9 +140,9 @@ export default function ProductSection() {
                 </div>
 
                 <div className="flex items-center justify-center gap-[18px]">
-                  {tabs.map((tab, index) => (
+                  {BESTSELLER_TABS.map((tab, index) => (
                     <button
-                      key={tab}
+                      key={tab.label}
                       className={
                         "text-[14px] leading-[24px] tracking-[0.2px] font-bold " +
                         (index === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
@@ -144,7 +151,7 @@ export default function ProductSection() {
                       onClick={() => setActiveTab(index)}
                       aria-pressed={index === activeTab}
                     >
-                      {tab}
+                      {tab.label}
                     </button>
                   ))}
                 </div>
@@ -154,7 +161,9 @@ export default function ProductSection() {
                     type="button"
                     className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                     onClick={() =>
-                      setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                      setActiveTab(
+                        (prev) => (prev - 1 + BESTSELLER_TABS.length) % BESTSELLER_TABS.length
+                      )
                     }
                   >
                     <ChevronLeft
@@ -165,7 +174,9 @@ export default function ProductSection() {
                   <button
                     type="button"
                     className="group w-[49px] h-[49px] border border-[#737373] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
-                    onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                    onClick={() =>
+                      setActiveTab((prev) => (prev + 1) % BESTSELLER_TABS.length)
+                    }
                   >
                     <ChevronRight className="text-[#737373] transition-colors duration-200" size={16} />
                   </button>
@@ -179,14 +190,10 @@ export default function ProductSection() {
             {/* products grid (3x2) */}
             <div className="w-full flex flex-col gap-[30px] pt-2">
               <div className="flex flex-wrap gap-[30px] justify-center lg:justify-start">
-                {products.map((p) => {
+                {visibleProducts.map((p) => {
                   const image =
                     p?.images?.[0]?.url || p?.images?.[0] || p?.image || productPlaceholder;
-                  const category =
-                    p?.category?.title ||
-                    p?.category?.name ||
-                    categoryMap.get(p?.category_id) ||
-                    "Kategori";
+                  const category = getCategoryTitle(p, categoryById);
                   const price = formatPrice(p.price);
                   const oldPrice = Number.isFinite(Number(p.price))
                     ? formatPrice(Number(p.price) * 1.2)
@@ -195,7 +202,7 @@ export default function ProductSection() {
                   return (
                     <ProductCard
                       key={p.id}
-                    to={`/product/${p.id}`}
+                      to={`/product/${p.id}`}
                       image={image}
                       title={p.name}
                       category={category}

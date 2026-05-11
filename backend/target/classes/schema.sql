@@ -1,0 +1,3 @@
+-- Intentionally kept as a reference placeholder.
+-- Hibernate creates the schema from entity definitions for local development.
+-- If you move to a managed database, convert entity mappings into an explicit SQL migration set.

@@ -13,12 +13,138 @@ import Clients from "../components/Clients.jsx";
 import ProductGallery from "../components/ProductGallery.jsx";
 import detailImg from "../assets/images/doritos-nacho-cheese.jpg";
 import { fetchProductDetailThunk } from "../store/actions/thunks";
+import { setSelectedProduct } from "../store/actions/productActions";
 import { addToCart } from "../store/actions/shoppingCartActions";
 import { toast } from "react-toastify";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
+import { slugifyTR } from "../utils/slug";
 
 const FAVORITES_STORAGE_KEY = "favoriteProductIds";
+const COLOR_VARIANTS = [
+  { className: "bg-[#23A6F0]", keywords: ["blue", "mavi"] },
+  { className: "bg-[#2DC071]", keywords: ["green", "yesil", "yeşil"] },
+  { className: "bg-[#E77C40]", keywords: ["orange", "turuncu"] },
+  { className: "bg-[#252B42]", keywords: ["navy", "lacivert", "black", "siyah"] },
+];
+
+function readFavoriteProductIds() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const ids = raw ? JSON.parse(raw) : [];
+    return Array.isArray(ids) ? ids.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function toGenderSlug(gender) {
+  return gender === "e" ? "erkek" : "kadin";
+}
+
+function normalizeText(value = "") {
+  return value
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/ı/g, "i")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getVariantFamilyKey(product) {
+  const normalizedName = normalizeText(product?.name || product?.title || "");
+  const colorWords = COLOR_VARIANTS.flatMap((variant) =>
+    variant.keywords.map((keyword) => normalizeText(keyword))
+  );
+  const stripped = normalizedName
+    .split(" ")
+    .filter((word) => word && !colorWords.includes(word))
+    .join(" ")
+    .trim();
+
+  return stripped || normalizedName;
+}
+
+function getProductColorIndex(product) {
+  const haystack = normalizeText(
+    `${product?.name || ""} ${product?.title || ""} ${product?.description || ""}`
+  );
+
+  return COLOR_VARIANTS.findIndex((variant) =>
+    variant.keywords.some((keyword) => haystack.includes(normalizeText(keyword)))
+  );
+}
+
+function buildProductPath(product, categoryById) {
+  if (!product?.id) return "#";
+
+  const categoryId = product?.category?.id || product?.category_id;
+  const category = product?.category || categoryById.get(categoryId);
+  const categoryTitle =
+    category?.title ||
+    category?.name ||
+    "Kategori";
+  const productSlug = slugifyTR(product?.name || product?.title || "product");
+
+  if (!categoryId || !category?.gender) {
+    return `/product/${product.id}`;
+  }
+
+  const genderSlug = toGenderSlug(category.gender);
+  return `/shop/${genderSlug}/${slugifyTR(categoryTitle)}/${categoryId}/${productSlug}/${product.id}`;
+}
+
+function buildColorVariantSlots(product, products) {
+  if (!product?.id) return COLOR_VARIANTS.map(() => null);
+
+  const categoryId = product?.category?.id || product?.category_id;
+  const productFamilyKey = getVariantFamilyKey(product);
+  const sameCategoryProducts = (products || []).filter((item) => {
+    const itemCategoryId = item?.category?.id || item?.category_id;
+    return item?.id != null && itemCategoryId === categoryId;
+  });
+
+  const familyMatches = sameCategoryProducts.filter(
+    (item) => getVariantFamilyKey(item) === productFamilyKey
+  );
+  const sourceProducts = familyMatches.length > 1 ? familyMatches : sameCategoryProducts;
+  const slots = COLOR_VARIANTS.map(() => null);
+
+  sourceProducts.forEach((item) => {
+    const colorIndex = getProductColorIndex(item);
+    if (colorIndex >= 0 && !slots[colorIndex]) {
+      slots[colorIndex] = item;
+    }
+  });
+
+  if (!slots.some((item) => item?.id === product.id)) {
+    const currentColorIndex = getProductColorIndex(product);
+    const targetIndex =
+      currentColorIndex >= 0
+        ? currentColorIndex
+        : slots.findIndex((item) => item == null) >= 0
+          ? slots.findIndex((item) => item == null)
+          : 0;
+    slots[targetIndex] = product;
+  }
+
+  const remainingProducts = sourceProducts.filter(
+    (item) => !slots.some((slot) => slot?.id === item.id)
+  );
+
+  remainingProducts.forEach((item) => {
+    const emptyIndex = slots.findIndex((slot) => slot == null);
+    if (emptyIndex >= 0) {
+      slots[emptyIndex] = item;
+    }
+  });
+
+  return slots;
+}
 
 function ColorDot({ color, isSelected, onClick }) {
   return (
@@ -28,6 +154,8 @@ function ColorDot({ color, isSelected, onClick }) {
         isSelected ? "ring-2 ring-[#23A6F0] ring-offset-2 ring-offset-white" : ""
       }`}
       aria-pressed={isSelected}
+      disabled={!onClick}
+      aria-disabled={!onClick}
       onClick={onClick}
     />
   );
@@ -45,6 +173,16 @@ function BestsellerCard({ product, categoryName }) {
     product?.category?.name ||
     categoryName ||
     "Kategori";
+  const priceValue = Number(product?.price);
+  const priceText = Number.isFinite(priceValue)
+    ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(priceValue)
+    : "";
+  const oldPriceText =
+    Number.isFinite(priceValue) && priceValue > 0
+      ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+          priceValue * 1.2
+        )
+      : "";
 
   return (
     <Link to={`/product/${product?.id}`} className="w-full max-w-[239px] bg-white flex flex-col">
@@ -58,14 +196,18 @@ function BestsellerCard({ product, categoryName }) {
         <div className="text-[14px] leading-[24px] tracking-[0.2px] font-bold text-[#737373] text-center">
           {categoryTitle}
         </div>
-        <div className="flex items-start gap-[5px] px-[3px] py-[5px]">
-          <span className="text-[16px] leading-[24px] tracking-[0.1px] font-bold text-[#BDBDBD]">
-            $16.48
-          </span>
-          <span className="text-[16px] leading-[24px] tracking-[0.1px] font-bold text-[#23856D]">
-            $6.48
-          </span>
-        </div>
+        {priceText && (
+          <div className="flex items-start gap-[5px] px-[3px] py-[5px]">
+            {oldPriceText && (
+              <span className="text-[16px] leading-[24px] tracking-[0.1px] font-bold text-[#BDBDBD]">
+                {oldPriceText}
+              </span>
+            )}
+            <span className="text-[16px] leading-[24px] tracking-[0.1px] font-bold text-[#23856D]">
+              {priceText}
+            </span>
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -76,28 +218,33 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const product = useSelector((s) => s.product.selectedProduct);
+  const productList = useSelector((s) => s.product.productList);
   const detailFetchState = useSelector((s) => s.product.detailFetchState);
-  const categories = useSelector((s) => s.product.categories) || [];
+  const categories = useSelector((s) => s.product.categories);
   const cart = useSelector((s) => s.shoppingCart.cart) || [];
   const [bestsellerProducts, setBestsellerProducts] = useState([]);
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [variantProducts, setVariantProducts] = useState([]);
+  const [favoriteProductIds, setFavoriteProductIds] = useState(readFavoriteProductIds);
   const [isQuickView, setIsQuickView] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    const ids = raw ? JSON.parse(raw) : [];
-    setIsFavorite(ids.includes(String(productId)));
-  }, [productId]);
+    const syncFavoriteProductIds = () => {
+      setFavoriteProductIds(readFavoriteProductIds());
+    };
+
+    window.addEventListener("favorites:changed", syncFavoriteProductIds);
+    return () => {
+      window.removeEventListener("favorites:changed", syncFavoriteProductIds);
+    };
+  }, []);
 
   const toggleFavorite = () => {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    const ids = raw ? JSON.parse(raw) : [];
+    const ids = readFavoriteProductIds();
     const idAsString = String(productId);
     const exists = ids.includes(idAsString);
     const next = exists ? ids.filter((id) => id !== idAsString) : [...ids, idAsString];
     localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(next));
-    setIsFavorite(!exists);
+    setFavoriteProductIds(next);
     window.dispatchEvent(new Event("favorites:changed"));
   };
 
@@ -105,22 +252,35 @@ export default function ProductDetailPage() {
     dispatch(fetchProductDetailThunk(productId));
   }, [dispatch, productId]);
 
-  const galleryImages = product?.images?.length
-    ? product.images
+  const displayProduct = useMemo(() => {
+    const routeProductId = String(productId);
+    const candidates = [product, ...variantProducts, ...(productList || [])];
+
+    return (
+      candidates.find(
+        (item) => item?.id != null && String(item.id) === routeProductId
+      ) || null
+    );
+  }, [product, productId, productList, variantProducts]);
+
+  const galleryImages = displayProduct?.images?.length
+    ? displayProduct.images
     : [{ url: detailImg, index: 0 }];
-  const ratingValue = Number(product?.rating) || 0;
-  const priceText = Number.isFinite(Number(product?.price))
+  const ratingValue = Number(displayProduct?.rating) || 0;
+  const priceText = Number.isFinite(Number(displayProduct?.price))
     ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-        Number(product?.price)
+        Number(displayProduct?.price)
       )
     : "$0.00";
-  const availabilityText = product?.stock > 0 ? "In Stock" : "Out of Stock";
-  const colorOptions = ["bg-[#23A6F0]", "bg-[#2DC071]", "bg-[#E77C40]", "bg-[#252B42]"];
+  const availabilityText = displayProduct?.stock > 0 ? "In Stock" : "Out of Stock";
   const cartCount = cart.reduce((sum, item) => sum + (item?.count || 0), 0);
+  const currentCategoryId = displayProduct?.category?.id || displayProduct?.category_id;
+  const isFavorite = favoriteProductIds.includes(String(productId));
+
   useEffect(() => {
     let isMounted = true;
 
-    const fetchBestSellers = async () => {
+    const fetchProducts = async () => {
       try {
         const res = await api.get("/products");
         const list = res.data?.products || res.data || [];
@@ -128,28 +288,108 @@ export default function ProductDetailPage() {
           .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
           .slice(0, 8)
           .map((p) => p);
-        if (isMounted) setBestsellerProducts(top8);
+        if (isMounted) {
+          setBestsellerProducts(top8);
+        }
       } catch (e) {
         console.error(e);
-        if (isMounted) setBestsellerProducts([]);
+        if (isMounted) {
+          setBestsellerProducts([]);
+        }
       }
     };
 
-    fetchBestSellers();
+    fetchProducts();
     return () => {
       isMounted = false;
     };
   }, []);
 
+  useEffect(() => {
+    if (!currentCategoryId) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchVariantProducts = async () => {
+      try {
+        const res = await api.get("/products", {
+          params: { category: currentCategoryId, limit: 100, offset: 0 },
+        });
+        const list = res.data?.products || res.data || [];
+        if (isMounted) {
+          setVariantProducts(list);
+        }
+      } catch (e) {
+        console.error(e);
+        if (isMounted) {
+          setVariantProducts([]);
+        }
+      }
+    };
+
+    fetchVariantProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentCategoryId]);
+
   const categoryMap = useMemo(() => {
     const map = new Map();
-    categories.forEach((c) => {
+    (categories || []).forEach((c) => {
       if (c?.id != null) {
         map.set(c.id, c.title || c.name || c.categoryName);
       }
     });
     return map;
   }, [categories]);
+
+  const categoryById = useMemo(() => {
+    const map = new Map();
+    (categories || []).forEach((c) => {
+      if (c?.id != null) {
+        map.set(c.id, c);
+      }
+    });
+    return map;
+  }, [categories]);
+
+  const colorVariantSlots = useMemo(
+    () => buildColorVariantSlots(displayProduct, variantProducts),
+    [displayProduct, variantProducts]
+  );
+  const selectedColorIndex = colorVariantSlots.findIndex(
+    (item) => item?.id === displayProduct?.id
+  );
+  const shouldShowInitialLoading = detailFetchState === "FETCHING" && !displayProduct;
+  const shouldShowLoadError = detailFetchState === "FAILED" && !displayProduct;
+  const shouldShowProductDetail =
+    Boolean(displayProduct) && !shouldShowLoadError && !shouldShowInitialLoading;
+
+  useEffect(() => {
+    colorVariantSlots.forEach((item) => {
+      if (!Array.isArray(item?.images)) return;
+
+      item.images.forEach((image) => {
+        const url = typeof image === "string" ? image : image?.url;
+        if (!url) return;
+        const preloadImage = new Image();
+        preloadImage.src = url;
+      });
+    });
+  }, [colorVariantSlots]);
+
+  const handleColorVariantClick = (targetProduct) => {
+    if (!targetProduct?.id) return;
+    if (String(targetProduct.id) === String(productId)) return;
+
+    dispatch(setSelectedProduct(targetProduct));
+    navigate(buildProductPath(targetProduct, categoryById), {
+      state: { preserveScroll: true },
+    });
+  };
 
   return (
     <div className="w-full bg-white">
@@ -182,31 +422,31 @@ export default function ProductDetailPage() {
 
       {/* Product detail */}
       <section className="w-full bg-[#FAFAFA]">
-        {detailFetchState === "FETCHING" && (
+        {shouldShowInitialLoading && (
           <div className="max-w-[1050px] mx-auto px-4 py-[48px] flex items-center justify-center">
             <div className="w-10 h-10 rounded-full border-4 border-[#E6E6E6] border-t-[#23A6F0] animate-spin" />
           </div>
         )}
 
-        {detailFetchState === "FAILED" && (
+        {shouldShowLoadError && (
           <div className="max-w-[1050px] mx-auto px-4 py-[48px] text-center text-[#737373]">
             Product could not be loaded.
           </div>
         )}
 
-        {detailFetchState !== "FETCHING" && detailFetchState !== "FAILED" && (
+        {shouldShowProductDetail && (
           <div className="max-w-[1050px] mx-auto px-4 py-[48px] flex flex-col lg:flex-row gap-[30px]">
             <div className="w-full lg:w-[510px]">
               <ProductGallery
                 images={galleryImages}
-                alt={product?.name || "Product"}
-                resetKey={product?.id || productId}
+                alt={displayProduct?.name || "Product"}
+                resetKey={displayProduct?.id || productId}
               />
             </div>
 
             <div className="w-full lg:w-[510px] flex flex-col gap-[20px]">
               <div className="text-[20px] leading-[30px] tracking-[0.2px] text-[#252B42]">
-                {product?.name || "Product"}
+                {displayProduct?.name || "Product"}
               </div>
 
             <div className="flex items-center gap-[10px] text-[14px] leading-[24px] tracking-[0.2px] text-[#737373] font-bold">
@@ -235,20 +475,30 @@ export default function ProductDetailPage() {
               </div>
 
               <p className="text-[14px] leading-[20px] tracking-[0.2px] text-[#858585]">
-                {product?.description || "Product description is not available."}
+                {displayProduct?.description || "Product description is not available."}
               </p>
 
               <div className="h-[1px] bg-[#BDBDBD]" />
 
               <div className="flex items-center gap-[10px]">
-                {colorOptions.map((color, index) => (
+                {COLOR_VARIANTS.map((variant, index) => {
+                  const targetProduct = colorVariantSlots[index];
+                  const isSelected =
+                    selectedColorIndex >= 0 ? selectedColorIndex === index : index === 0;
+
+                  return (
                   <ColorDot
-                    key={color}
-                    color={color}
-                    isSelected={selectedColorIndex === index}
-                    onClick={() => setSelectedColorIndex(index)}
+                    key={variant.className}
+                    color={variant.className}
+                    isSelected={isSelected}
+                    onClick={
+                      targetProduct?.id
+                        ? () => handleColorVariantClick(targetProduct)
+                        : undefined
+                    }
                   />
-                ))}
+                  );
+                })}
               </div>
 
               <div className="flex flex-wrap items-center gap-[10px]">
@@ -256,8 +506,8 @@ export default function ProductDetailPage() {
                   type="button"
                   className="h-[44px] px-[20px] bg-[#23A6F0] text-white rounded-[5px] text-[14px] leading-[24px] tracking-[0.2px] font-bold"
                   onClick={() => {
-                    if (product) {
-                      dispatch(addToCart(product));
+                    if (displayProduct) {
+                      dispatch(addToCart(displayProduct));
                       toast.success("Sepete eklendi!");
                     }
                   }}
@@ -282,7 +532,7 @@ export default function ProductDetailPage() {
                   className="relative w-[40px] h-[40px] rounded-full border border-[#E8E8E8] flex items-center justify-center"
                   aria-label="Add to cart"
                   onClick={() => {
-                    if (product) dispatch(addToCart(product));
+                    if (displayProduct) dispatch(addToCart(displayProduct));
                   }}
                 >
                   <ShoppingCart size={18} className="text-[#252B42]" />

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Clients from "../components/Clients.jsx";
 import { slugifyTR } from "../utils/slug";
-import { fetchProductsThunk } from "../store/actions/thunks";
+import { fetchCategoriesThunk, fetchProductsThunk } from "../store/actions/thunks";
 import { setCategoryId, setFilter, setOffset, setSort } from "../store/actions/productActions";
 
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
@@ -71,20 +71,28 @@ function CategoryCard({ id, categoryId, img, title, rating, gender }) {
 }
 
 function ShopProductCard({ imageCandidates, to, title, category, oldPrice, price }) {
-  const initialImage = imageCandidates?.[0];
+  const primaryImageCandidates = imageCandidates?.length ? imageCandidates : [productPlaceholder];
+  const hoverImageCandidates =
+    imageCandidates?.length > 1 ? imageCandidates.slice(1) : primaryImageCandidates;
+  const initialImage = primaryImageCandidates[0];
+  const hoverImage = hoverImageCandidates[0];
+  const hasHoverImage = hoverImage && hoverImage !== initialImage;
+
   return (
     <Link
       to={to}
-      className="w-full max-w-[240px] flex flex-col bg-white cursor-pointer transition-shadow hover:shadow-md"
+      className="group w-full max-w-[240px] flex flex-col bg-white cursor-pointer"
     >
-      <div className="w-full h-[300px] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-[300px] flex items-center justify-center overflow-hidden">
         <img
           src={initialImage}
           alt={title}
-          className="max-h-[260px] w-auto object-contain"
+          className={`max-h-[260px] w-auto object-contain transition-opacity duration-300 ${
+            hasHoverImage ? "group-hover:opacity-0" : ""
+          }`}
           data-fallback-index="0"
           onError={(e) => {
-            const list = imageCandidates || [];
+            const list = primaryImageCandidates;
             const currentIndex = Number(e.currentTarget.dataset.fallbackIndex || "0");
             const nextIndex = currentIndex + 1;
             if (nextIndex < list.length) {
@@ -93,6 +101,27 @@ function ShopProductCard({ imageCandidates, to, title, category, oldPrice, price
             }
           }}
         />
+        {hasHoverImage && (
+          <img
+            src={hoverImage}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 m-auto max-h-[260px] w-auto object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            data-fallback-index="0"
+            onError={(e) => {
+              const list = hoverImageCandidates;
+              const currentIndex = Number(e.currentTarget.dataset.fallbackIndex || "0");
+              const nextIndex = currentIndex + 1;
+              if (nextIndex < list.length) {
+                e.currentTarget.dataset.fallbackIndex = String(nextIndex);
+                e.currentTarget.src = list[nextIndex];
+                return;
+              }
+
+              e.currentTarget.src = initialImage;
+            }}
+          />
+        )}
       </div>
 
       <div className="flex flex-col items-center gap-[10px] px-[25px] pt-[25px] pb-[35px]">
@@ -129,7 +158,7 @@ function ShopProductCard({ imageCandidates, to, title, category, oldPrice, price
 
 export default function ShopPage() {
   // ✅ Redux'tan categories al
-  const categoriesFromStore = useSelector((s) => s.product.categories) || [];
+  const categoriesFromStore = useSelector((s) => s.product.categories);
   const productList = useSelector((s) => s.product.productList) || [];
   const total = useSelector((s) => s.product.total) || 0;
   const fetchState = useSelector((s) => s.product.fetchState);
@@ -147,7 +176,7 @@ export default function ShopPage() {
   }, [categoryIdParam]);
 
   // ✅ rating'e göre top 5 seç
-  const top5Categories = [...categoriesFromStore]
+  const top5Categories = [...(categoriesFromStore || [])]
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     .slice(0, 5);
   const normalizedTopCategories = top5Categories.map((c) => ({
@@ -158,7 +187,7 @@ export default function ShopPage() {
 
   const categoryMap = useMemo(() => {
     const map = new Map();
-    categoriesFromStore.forEach((c) => {
+    (categoriesFromStore || []).forEach((c) => {
       if (c?.id != null) {
         map.set(c.id, c.title || c.name || c.categoryName);
       }
@@ -171,6 +200,10 @@ export default function ShopPage() {
   useEffect(() => {
     setSortDraft(sort);
   }, [sort]);
+
+  useEffect(() => {
+    dispatch(fetchCategoriesThunk());
+  }, [dispatch]);
 
   useEffect(() => {
     if (parsedCategoryId !== categoryId) {
@@ -199,19 +232,32 @@ export default function ShopPage() {
 
   const getProductImageCandidates = (product) => {
     const productImages = [];
-    if (product?.images?.[0]?.url) productImages.push(product.images[0].url);
-    if (product?.images?.[0] && typeof product.images[0] === "string") {
-      productImages.push(product.images[0]);
+    if (Array.isArray(product?.images)) {
+      product.images.forEach((image) => {
+        if (typeof image === "string") {
+          productImages.push(image);
+          return;
+        }
+
+        if (image?.url) {
+          productImages.push(image.url);
+        }
+      });
     }
     if (product?.image) productImages.push(product.image);
 
     const categoryImages = getCategoryImageCandidates(product);
 
-    return [...productImages, ...categoryImages, productPlaceholder].filter(Boolean);
+    return [...new Set([...productImages, ...categoryImages, productPlaceholder].filter(Boolean))];
   };
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const currentPage = Math.min(totalPages, Math.floor(offset / limit) + 1);
+  const isProductListReady = fetchState === "FETCHED";
+  const hasNoProducts = isProductListReady && productList.length === 0;
+  const hasActiveFilter = Boolean(filter);
+  const isFetchingProducts = fetchState === "FETCHING";
+  const showInitialProductLoading = isFetchingProducts && productList.length === 0;
   const pageNumbers = useMemo(() => {
     if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
     if (currentPage <= 2) return [1, 2, 3];
@@ -351,10 +397,19 @@ export default function ShopPage() {
 
       {/* Products */}
       <div className="w-full bg-white">
-        <div className="max-w-[1124px] mx-auto px-4 py-[48px] flex flex-wrap justify-center gap-[30px]">
-          {fetchState === "FETCHING" && (
+        <div className="relative max-w-[1124px] min-h-[420px] mx-auto px-4 py-[48px] flex flex-wrap justify-center gap-[30px]">
+          {showInitialProductLoading && (
             <div className="w-full flex items-center justify-center py-10">
               <div className="w-10 h-10 rounded-full border-4 border-[#E6E6E6] border-t-[#23A6F0] animate-spin" />
+            </div>
+          )}
+
+          {isFetchingProducts && productList.length > 0 && (
+            <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center">
+              <div className="h-8 px-4 rounded-full border border-[#ECECEC] bg-white/95 shadow-sm flex items-center gap-2 text-[12px] leading-[16px] font-bold text-[#737373]">
+                <span className="w-3 h-3 rounded-full border-2 border-[#E6E6E6] border-t-[#23A6F0] animate-spin" />
+                Loading products...
+              </div>
             </div>
           )}
 
@@ -364,8 +419,7 @@ export default function ShopPage() {
             </div>
           )}
 
-          {fetchState !== "FETCHING" &&
-            fetchState !== "FAILED" &&
+          {fetchState !== "FAILED" &&
             productList.map((product) => {
               const title = product?.name || product?.title || "Product";
               const categoryTitle =
@@ -386,18 +440,29 @@ export default function ShopPage() {
                   : "";
 
               return (
-                <ShopProductCard
+                <div
                   key={product.id}
-                  imageCandidates={getProductImageCandidates(product)}
-                  to={`/shop/${genderSlug}/${categorySlug}/${categoryIdValue}/${productSlug}/${product.id}`}
-                  title={title}
-                  category={categoryTitle}
-                  oldPrice={oldPrice}
-                  price={price}
-                />
+                  className={`transition-opacity duration-200 ${
+                    isFetchingProducts ? "opacity-60" : "opacity-100"
+                  }`}
+                >
+                  <ShopProductCard
+                    imageCandidates={getProductImageCandidates(product)}
+                    to={`/shop/${genderSlug}/${categorySlug}/${categoryIdValue}/${productSlug}/${product.id}`}
+                    title={title}
+                    category={categoryTitle}
+                    oldPrice={oldPrice}
+                    price={price}
+                  />
+                </div>
               );
             })}
-          {fetchState === "FETCHED" && productList.length === 0 && (filter || sort) && (
+          {hasNoProducts && !hasActiveFilter && (
+            <div className="w-full py-10 text-center text-[20px] leading-[30px] tracking-[0.2px] font-bold text-[#737373]">
+              Ürün bulunmamaktadır.
+            </div>
+          )}
+          {hasNoProducts && hasActiveFilter && (
             <div className="w-full text-center text-[#737373] py-10">
               Bu filtrelere uygun ürün bulunamadı.
               <div className="mt-4">

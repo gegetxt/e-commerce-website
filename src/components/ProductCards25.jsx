@@ -4,34 +4,35 @@ import { Link } from "react-router-dom";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import rightBannerImg from "../assets/images/right-banner.jpg";
+import {
+  BESTSELLER_FETCH_LIMIT,
+  BESTSELLER_TABS,
+  buildCategoryById,
+  getBestSellerProductsForTab,
+  getCategoryTitle,
+} from "../utils/bestsellerProducts";
 
 export default function ProductCards25() {
   const [products, setProducts] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  const categories = useSelector((s) => s.product.categories) || [];
+  const categories = useSelector((s) => s.product.categories);
 
-  const tabs = ["Men", "Women", "Accessories"];
+  const categoryById = useMemo(() => buildCategoryById(categories), [categories]);
 
-  const categoryMap = useMemo(() => {
-    const map = new Map();
-    categories.forEach((c) => {
-      if (c?.id != null) {
-        map.set(c.id, c.title || c.name || c.categoryName);
-      }
-    });
-    return map;
-  }, [categories]);
+  const visibleProducts = useMemo(
+    () => getBestSellerProductsForTab(products, categoryById, activeTab),
+    [products, categoryById, activeTab]
+  );
 
   useEffect(() => {
     let isMounted = true;
     const fetchTopProducts = async () => {
       try {
-        const res = await api.get("/products");
+        const res = await api.get("/products", {
+          params: { limit: BESTSELLER_FETCH_LIMIT, offset: 0 },
+        });
         const list = res.data?.products || res.data || [];
-        const top6 = [...list]
-          .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
-          .slice(0, 6);
-        if (isMounted) setProducts(top6);
+        if (isMounted) setProducts(list);
       } catch (e) {
         console.error(e);
         if (isMounted) setProducts([]);
@@ -67,9 +68,9 @@ export default function ProductCards25() {
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-[15px]">
-                    {tabs.map((t, i) => (
+                    {BESTSELLER_TABS.map((tab, i) => (
                       <button
-                        key={t}
+                        key={tab.label}
                         className={
                           "text-[14px] leading-[24px] tracking-[0.2px] font-bold px-4 py-2 rounded-[37px] " +
                           (i === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
@@ -78,7 +79,7 @@ export default function ProductCards25() {
                         onClick={() => setActiveTab(i)}
                         aria-pressed={i === activeTab}
                       >
-                        {t}
+                        {tab.label}
                       </button>
                     ))}
                   </div>
@@ -89,7 +90,9 @@ export default function ProductCards25() {
                       className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                       aria-label="Prev"
                       onClick={() =>
-                        setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                        setActiveTab(
+                          (prev) => (prev - 1 + BESTSELLER_TABS.length) % BESTSELLER_TABS.length
+                        )
                       }
                     >
                       <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
@@ -100,7 +103,9 @@ export default function ProductCards25() {
                       type="button"
                       className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                       aria-label="Next"
-                      onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                      onClick={() =>
+                        setActiveTab((prev) => (prev + 1) % BESTSELLER_TABS.length)
+                      }
                     >
                       <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
                         ›
@@ -117,9 +122,9 @@ export default function ProductCards25() {
                 </div>
 
                 <div className="flex items-center justify-center gap-[18px]">
-                  {tabs.map((t, i) => (
+                  {BESTSELLER_TABS.map((tab, i) => (
                     <button
-                      key={t}
+                      key={tab.label}
                       className={
                         "text-[14px] leading-[24px] tracking-[0.2px] font-bold " +
                         (i === activeTab ? "text-[#23A6F0]" : "text-[#737373]")
@@ -128,7 +133,7 @@ export default function ProductCards25() {
                       onClick={() => setActiveTab(i)}
                       aria-pressed={i === activeTab}
                     >
-                      {t}
+                      {tab.label}
                     </button>
                   ))}
                 </div>
@@ -139,7 +144,9 @@ export default function ProductCards25() {
                     className="group w-[49px] h-[49px] border border-[#BDBDBD] rounded-[34px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                     aria-label="Prev"
                     onClick={() =>
-                      setActiveTab((prev) => (prev - 1 + tabs.length) % tabs.length)
+                      setActiveTab(
+                        (prev) => (prev - 1 + BESTSELLER_TABS.length) % BESTSELLER_TABS.length
+                      )
                     }
                   >
                     <span className="text-[#BDBDBD] text-[18px] leading-none transition-colors duration-200 group-hover:text-[#737373]">
@@ -150,7 +157,9 @@ export default function ProductCards25() {
                     type="button"
                     className="group w-[49px] h-[49px] border border-[#737373] rounded-[33px] flex items-center justify-center transition-colors duration-200 hover:border-[#737373]"
                     aria-label="Next"
-                    onClick={() => setActiveTab((prev) => (prev + 1) % tabs.length)}
+                    onClick={() =>
+                      setActiveTab((prev) => (prev + 1) % BESTSELLER_TABS.length)
+                    }
                   >
                     <span className="text-[#737373] text-[18px] leading-none transition-colors duration-200">
                       ›
@@ -165,14 +174,10 @@ export default function ProductCards25() {
 
             {/* products grid (2 rows x 3) */}
             <div className="mt-6 flex flex-wrap justify-center gap-[30px]">
-              {products.map((p) => {
+              {visibleProducts.map((p) => {
                 const image =
                   p?.images?.[0]?.url || p?.images?.[0] || p?.image || productPlaceholder;
-                const dept =
-                  p?.category?.title ||
-                  p?.category?.name ||
-                  categoryMap.get(p?.category_id) ||
-                  "Kategori";
+                const dept = getCategoryTitle(p, categoryById);
                 const price = formatPrice(p.price);
                 const oldPrice = Number.isFinite(Number(p.price))
                   ? formatPrice(Number(p.price) * 1.2)

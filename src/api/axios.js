@@ -1,15 +1,13 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://workintech-fe-ecommerce.onrender.com",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
 });
 
-// ✅ Token header set
 export function setAuthToken(token) {
-  api.defaults.headers.common["Authorization"] = token; // ❗ Bearer yok
+  api.defaults.headers.common.Authorization = token;
 }
 
-// ✅ Token header clear
 export function clearAuthToken() {
-  delete api.defaults.headers.common["Authorization"];
+  delete api.defaults.headers.common.Authorization;
 }
