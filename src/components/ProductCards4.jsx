@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { api } from "../api/axios";
 import mostPopularProductImg from "../assets/images/most-popular-product.jpg";
 import mostPopularBannerImg from "../assets/images/most-popular-banner.png";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
+import { BESTSELLER_FETCH_LIMIT } from "../utils/bestsellerProducts";
+import { fetchProductsCached } from "../utils/productRequests";
 
 export default function ProductCards4() {
     const [featuredProduct, setFeaturedProduct] = useState(null);
-    const categories = useSelector((s) => s.product.categories) || [];
+    const categories = useSelector((s) => s.product.categories);
 
     const categoryMap = useMemo(() => {
       const map = new Map();
-      categories.forEach((c) => {
+      (categories || []).forEach((c) => {
         if (c?.id != null) {
           map.set(c.id, c.title || c.name || c.categoryName);
         }
@@ -24,8 +25,10 @@ export default function ProductCards4() {
 
       const fetchTopRated = async () => {
         try {
-          const res = await api.get("/products");
-          const list = res.data?.products || res.data || [];
+          const list = await fetchProductsCached({
+            limit: BESTSELLER_FETCH_LIMIT,
+            offset: 0,
+          });
           const map = new Map();
 
           list.forEach((p) => {

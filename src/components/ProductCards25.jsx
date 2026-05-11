@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import rightBannerImg from "../assets/images/right-banner.jpg";
 import {
@@ -11,6 +10,7 @@ import {
   getBestSellerProductsForTab,
   getCategoryTitle,
 } from "../utils/bestsellerProducts";
+import { fetchProductsCached } from "../utils/productRequests";
 
 export default function ProductCards25() {
   const [products, setProducts] = useState([]);
@@ -28,10 +28,10 @@ export default function ProductCards25() {
     let isMounted = true;
     const fetchTopProducts = async () => {
       try {
-        const res = await api.get("/products", {
-          params: { limit: BESTSELLER_FETCH_LIMIT, offset: 0 },
+        const list = await fetchProductsCached({
+          limit: BESTSELLER_FETCH_LIMIT,
+          offset: 0,
         });
-        const list = res.data?.products || res.data || [];
         if (isMounted) setProducts(list);
       } catch (e) {
         console.error(e);

@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
+import { BESTSELLER_FETCH_LIMIT } from "../utils/bestsellerProducts";
+import { fetchProductsCached } from "../utils/productRequests";
 
 export default function BestsellerProducts() {
   const [products, setProducts] = useState([]);
-  const categories = useSelector((s) => s.product.categories) || [];
+  const categories = useSelector((s) => s.product.categories);
 
   const categoryMap = useMemo(() => {
     const map = new Map();
-    categories.forEach((c) => {
+    (categories || []).forEach((c) => {
       if (c?.id != null) {
         map.set(c.id, c.title || c.name || c.categoryName);
       }
@@ -23,8 +24,10 @@ export default function BestsellerProducts() {
 
     const fetchBestSellers = async () => {
       try {
-        const res = await api.get("/products");
-        const list = res.data?.products || res.data || [];
+        const list = await fetchProductsCached({
+          limit: BESTSELLER_FETCH_LIMIT,
+          offset: 0,
+        });
         const top4 = [...list]
           .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
           .slice(0, 4);

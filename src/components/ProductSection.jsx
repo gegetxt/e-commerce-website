@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import ProductCard from "./ProductCard.jsx";
 import leftBannerImg from "../assets/images/left-banner.jpg";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
-import { api } from "../api/axios";
 import {
   BESTSELLER_FETCH_LIMIT,
   BESTSELLER_TABS,
@@ -12,6 +11,7 @@ import {
   getBestSellerProductsForTab,
   getCategoryTitle,
 } from "../utils/bestsellerProducts";
+import { fetchProductsCached } from "../utils/productRequests";
 
 export default function ProductSection() {
   const [products, setProducts] = useState([]);
@@ -29,10 +29,10 @@ export default function ProductSection() {
     let isMounted = true;
     const fetchTopProducts = async () => {
       try {
-        const res = await api.get("/products", {
-          params: { limit: BESTSELLER_FETCH_LIMIT, offset: 0 },
+        const list = await fetchProductsCached({
+          limit: BESTSELLER_FETCH_LIMIT,
+          offset: 0,
         });
-        const list = res.data?.products || res.data || [];
         if (isMounted) setProducts(list);
       } catch (e) {
         console.error(e);
