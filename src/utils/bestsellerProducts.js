@@ -10,6 +10,16 @@ const normalizeId = (value) => (value == null ? "" : String(value));
 
 const normalizeGender = (value) => (value == null ? "" : String(value).trim().toLowerCase());
 
+const compareByBestSellerRank = (a, b) => {
+  const sellCountDiff = (Number(b.sell_count) || 0) - (Number(a.sell_count) || 0);
+
+  if (sellCountDiff !== 0) {
+    return sellCountDiff;
+  }
+
+  return (Number(a.id) || 0) - (Number(b.id) || 0);
+};
+
 export const getProductCategoryId = (product) =>
   product?.category_id ?? product?.categoryId ?? product?.category?.id;
 
@@ -65,35 +75,9 @@ export const getBestSellerProductsForTab = (
 
       return normalizeGender(productGender) === activeGender;
     })
-    .sort((a, b) => (Number(b.sell_count) || 0) - (Number(a.sell_count) || 0))
+    .sort(compareByBestSellerRank)
     .slice(0, limit);
 };
 
-export const getCategoryDistinctBestSellers = (products = [], limit = 4) => {
-  const sortedProducts = [...products].sort(
-    (a, b) => (Number(b.sell_count) || 0) - (Number(a.sell_count) || 0)
-  );
-  const bestByCategory = new Map();
-
-  sortedProducts.forEach((product) => {
-    const categoryId = normalizeId(getProductCategoryId(product));
-    const key = categoryId || `product:${product?.id}`;
-
-    if (!bestByCategory.has(key)) {
-      bestByCategory.set(key, product);
-    }
-  });
-
-  const categoryWinners = Array.from(bestByCategory.values()).slice(0, limit);
-
-  if (categoryWinners.length >= limit) {
-    return categoryWinners;
-  }
-
-  const selectedIds = new Set(categoryWinners.map((product) => product?.id));
-  const fillers = sortedProducts
-    .filter((product) => !selectedIds.has(product?.id))
-    .slice(0, limit - categoryWinners.length);
-
-  return [...categoryWinners, ...fillers];
-};
+export const getTopBestSellerProducts = (products = [], limit = 4) =>
+  [...products].sort(compareByBestSellerRank).slice(0, limit);

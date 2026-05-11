@@ -19,7 +19,10 @@ import { toast } from "react-toastify";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import { slugifyTR } from "../utils/slug";
-import { BESTSELLER_FETCH_LIMIT } from "../utils/bestsellerProducts";
+import {
+  BESTSELLER_FETCH_LIMIT,
+  getTopBestSellerProducts,
+} from "../utils/bestsellerProducts";
 import { fetchProductsCached } from "../utils/productRequests";
 
 const FAVORITES_STORAGE_KEY = "favoriteProductIds";
@@ -288,17 +291,7 @@ export default function ProductDetailPage() {
           limit: BESTSELLER_FETCH_LIMIT,
           offset: 0,
         });
-        const top8 = [...list]
-          .sort((a, b) => {
-            const sellCountDiff = (Number(b.sell_count) || 0) - (Number(a.sell_count) || 0);
-
-            if (sellCountDiff !== 0) {
-              return sellCountDiff;
-            }
-
-            return (Number(a.id) || 0) - (Number(b.id) || 0);
-          })
-          .slice(0, 8);
+        const top8 = getTopBestSellerProducts(list, 8);
         if (isMounted) {
           setBestsellerProducts(top8);
         }

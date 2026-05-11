@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import {
   BESTSELLER_FETCH_LIMIT,
-  getCategoryDistinctBestSellers,
+  getTopBestSellerProducts,
 } from "../utils/bestsellerProducts";
 import { fetchProductsCached } from "../utils/productRequests";
 
@@ -31,7 +31,7 @@ export default function BestsellerProducts() {
           limit: BESTSELLER_FETCH_LIMIT,
           offset: 0,
         });
-        const top4 = getCategoryDistinctBestSellers(list, 4);
+        const top4 = getTopBestSellerProducts(list, 4);
 
         if (isMounted) setProducts(top4);
       } catch (e) {
