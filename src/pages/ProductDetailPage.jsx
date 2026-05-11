@@ -289,10 +289,16 @@ export default function ProductDetailPage() {
           offset: 0,
         });
         const top8 = [...list]
-          .filter((item) => String(item?.id) !== String(productId))
-          .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
-          .slice(0, 8)
-          .map((p) => p);
+          .sort((a, b) => {
+            const sellCountDiff = (Number(b.sell_count) || 0) - (Number(a.sell_count) || 0);
+
+            if (sellCountDiff !== 0) {
+              return sellCountDiff;
+            }
+
+            return (Number(a.id) || 0) - (Number(b.id) || 0);
+          })
+          .slice(0, 8);
         if (isMounted) {
           setBestsellerProducts(top8);
         }
@@ -308,7 +314,7 @@ export default function ProductDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [productId]);
+  }, []);
 
   useEffect(() => {
     if (!currentCategoryId) {
