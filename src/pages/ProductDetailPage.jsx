@@ -19,6 +19,8 @@ import { toast } from "react-toastify";
 import { api } from "../api/axios";
 import productPlaceholder from "../assets/images/vegan-milk.jpg";
 import { slugifyTR } from "../utils/slug";
+import { BESTSELLER_FETCH_LIMIT } from "../utils/bestsellerProducts";
+import { fetchProductsCached } from "../utils/productRequests";
 
 const FAVORITES_STORAGE_KEY = "favoriteProductIds";
 const COLOR_VARIANTS = [
@@ -282,9 +284,12 @@ export default function ProductDetailPage() {
 
     const fetchProducts = async () => {
       try {
-        const res = await api.get("/products");
-        const list = res.data?.products || res.data || [];
+        const list = await fetchProductsCached({
+          limit: BESTSELLER_FETCH_LIMIT,
+          offset: 0,
+        });
         const top8 = [...list]
+          .filter((item) => String(item?.id) !== String(productId))
           .sort((a, b) => (b.sell_count ?? 0) - (a.sell_count ?? 0))
           .slice(0, 8)
           .map((p) => p);
@@ -303,7 +308,7 @@ export default function ProductDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [productId]);
 
   useEffect(() => {
     if (!currentCategoryId) {
