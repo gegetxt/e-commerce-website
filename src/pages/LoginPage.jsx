@@ -45,7 +45,7 @@ export default function LoginPage() {
                 type="email"
                 className="w-full h-11 px-3 rounded-[5px] border border-[#E6E6E6] text-[#252B42]
                            focus:outline-none focus:ring-2 focus:ring-[#23A6F0]"
-                placeholder="customer@commerce.com"
+
                 {...register("email", {
                   required: "Email zorunlu",
                   pattern: {
@@ -67,7 +67,7 @@ export default function LoginPage() {
                 type="password"
                 className="w-full h-11 px-3 rounded-[5px] border border-[#E6E6E6] text-[#252B42]
                            focus:outline-none focus:ring-2 focus:ring-[#23A6F0]"
-                placeholder="123456"
+
                 {...register("password", { required: true })}
               />
             </div>
@@ -86,10 +86,7 @@ export default function LoginPage() {
               {isSubmitting ? "Gönderiliyor..." : "Giriş Yap"}
             </button>
 
-            <p className="text-[12px] text-[#737373]">
-              Test kullanıcıları (şifre: 123456): customer@commerce.com, store@commerce.com,
-              admin@commerce.com
-            </p>
+
           </form>
         </div>
       </div>
