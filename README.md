@@ -1,16 +1,72 @@
-# React + Vite
+# E-Commerce Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a full-stack e-commerce web application that allows users to browse products, filter them by category, view product details, create an account, log in, and complete the order process.
 
-Currently, two official plugins are available:
+The frontend was developed using React, Vite, Redux, and Tailwind CSS. On the backend side, I built a REST API with Java Spring Boot. User operations, product listing, category management, address and card information, and order processes are all handled through the backend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+While developing this project, my goal was not only to create a user interface, but also to understand how a real e-commerce system works from start to finish. I worked on frontend-backend communication, REST API integration, user authentication, database connection, and order management.
 
-## React Compiler
+## Project Purpose
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+The main purpose of this project was to simulate the core features of a modern e-commerce application. On the user side, the application includes functions such as viewing products, searching, filtering, adding products to the cart, and creating orders. On the backend side, I created an API structure to support and manage these operations.
 
-## Expanding the ESLint configuration
+Through this project, I especially aimed to gain hands-on experience with REST API usage, frontend-backend integration, token-based authentication, database operations, and API testing.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Key Features
+
+* Product listing
+* Product detail page
+* Category-based filtering
+* Product search
+* Sorting by price and rating
+* User registration and login
+* Token verification
+* Shopping cart management
+* Adding, updating, and deleting addresses
+* Adding, updating, and deleting card information
+* Order creation
+* Viewing previous orders
+* REST API integration
+* API testing and documentation with Postman
+
+## Technologies Used
+
+### Frontend
+
+* React
+* Vite
+* JavaScript
+* Redux / Redux Toolkit
+* React Router
+* Axios
+* Tailwind CSS
+* React Hook Form
+
+### Backend
+
+* Java 17
+* Spring Boot
+* Spring Web
+* Spring Data JPA
+* Spring Security
+* PostgreSQL
+* Maven
+* Lombok
+
+### Tools
+
+* Git / GitHub
+* Postman
+* Vercel
+* Render
+* Neon
+
+## GitHub
+
+Project link: https://github.com/gegetxt/e-commerce-website
+
+## Vercel
+
+Live demo:https://e-commerce-website-kappa-liard-25.vercel.app/
+
+
